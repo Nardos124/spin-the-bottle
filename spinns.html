@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<title>Spin the Bottle – Complete Game</title>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<style>
+:root{--accent:#6c5ce7;--muted:#4b4b7d}
+html,body{height:100%;margin:0;font-family:'Poppins',sans-serif;display:flex;flex-direction:column;}
+body::before{
+  content:"";position:fixed;inset:0;
+  background:linear-gradient(rgba(0,0,0,0.28),rgba(0,0,0,0.28)),url("spinimg.jpg") center/cover no-repeat;
+  filter:blur(6px);z-index:-1;
+}
+.header{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);padding:14px 28px;box-shadow:0 4px 10px rgba(0,0,0,0.08);position:sticky;top:0;z-index:10}
+.logo{font-weight:700;font-size:22px;color:var(--muted)}
+.top-controls{display:flex;gap:12px;align-items:center}
+.select,.btn{padding:8px 12px;border-radius:10px;border:0;cursor:pointer;font-weight:600}
+.select{background:rgba(255,255,255,0.9);border:1px solid #e6e6e6}
+.btn{background:var(--accent);color:#fff}
+.btn:hover{filter:brightness(1.05)}
+.main-container{flex:1;display:flex;height:calc(100vh - 72px)}
+.players-sidebar{width:260px;margin:20px;background:rgba(255,255,255,0.78);backdrop-filter:blur(9px);border-radius:15px;padding:18px;box-shadow:0 8px 24px rgba(0,0,0,0.18);display:flex;flex-direction:column;gap:10px;overflow:auto}
+.players-sidebar h3{margin:0;color:var(--muted);text-align:center}
+.player-card{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:rgba(245,245,245,0.85);box-shadow:0 3px 6px rgba(0,0,0,0.04)}
+.player-card .delete{color:#e74c3c;cursor:pointer;padding-left:8px;font-weight:700}
+.game-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;margin:20px;gap:20px;overflow-y:auto}
+.card{width:100%;max-width:420px;background:rgba(255,255,255,0.76);backdrop-filter:blur(8px);padding:18px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,0.15);display:flex;flex-direction:column;align-items:center;gap:12px}
+.add-player .controls{display:flex;gap:8px;align-items:center;width:100%}
+.add-player input{flex:1;padding:8px 10px;border-radius:10px;border:1px solid #ddd;font-size:15px}
+.add-player select{padding:8px;border-radius:10px;border:1px solid #ddd;font-size:15px}
+.add-player button{background:brown;color:white;padding:8px 12px;border-radius:10px;border:0;cursor:pointer}
+#spinningImage{width:210px;height:210px;border-radius:50%;object-fit:cover;box-shadow:0 8px 22px rgba(0,0,0,0.25);transition:transform 2s cubic-bezier(.33,1,.68,1)}
+#spinResult{min-height:56px;text-align:center;color:var(--muted);font-weight:700;font-size:18px;padding:6px 8px}
+.spin-section button{background:var(--accent);color:white;padding:10px 18px;border-radius:12px;border:0;font-weight:700;cursor:pointer}
+@media(max-width:880px){.main-container{flex-direction:column;align-items:center;overflow:auto}.players-sidebar{width:92%;max-width:420px}.card{max-width:92%}}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Spin the Bottle</div>
+  <div class="top-controls">
+    <select id="gameSelector" class="select" onchange="selectGame(parseInt(this.value))">
+      <option value="1">Game 1 — Classic</option>
+      <option value="2">Game 2 — Question Mode</option>
+      <option value="3">Game 3 — Truth or Dare</option>
+    </select>
+
+    <select id="gameTypeSelector" class="select" onchange="setGameType(this.value)">
+      <option value="general">General</option>
+      <option value="couples">Couples</option>
+      <option value="parents">Parents</option>
+      <option value="family">Family</option>
+      <option value="teens">Teens</option>
+      <option value="neighbors">Neighbors</option>
+    </select>
+
+    <button class="btn" onclick="resetPlayers()">Reset</button>
+  </div>
+</div>
+
+<div class="main-container">
+  <div class="players-sidebar" id="savedPlayersContainer">
+    <h3>Players</h3>
+    <div style="text-align:center;color:#777;padding:6px 0">No players yet — add someone!</div>
+  </div>
+
+  <div class="game-area">
+
+    <!-- Add Player Card (Prominent at top) -->
+    <div class="card add-player" style="order:1">
+      <h3 style="margin:0 0 10px 0; font-size:20px">Add Player</h3>
+      <div class="controls">
+        <input id="playerNameInput" placeholder="Player name"/>
+        <select id="playerEmojiSelect">
+          <option value="😊">😊</option>
+          <option value="😂">😂</option>
+          <option value="😎">😎</option>
+          <option value="🥳">🥳</option>
+          <option value="😇">😇</option>
+          <option value="🤪">🤪</option>
+        </select>
+        <button onclick="addPlayer()">Save</button>
+      </div>
+    </div>
+
+    <!-- Custom Question Card (Below player add) -->
+    <div class="card add-player" style="order:2">
+      <h3 style="margin:0 0 10px 0; font-size:20px">Add Custom Question</h3>
+      <input id="customQuestionInput" placeholder="Type your question"/>
+      <select id="customQuestionType" class="select">
+        <option value="general">General</option>
+        <option value="couples">Couples</option>
+        <option value="parents">Parents</option>
+        <option value="family">Family</option>
+        <option value="teens">Teens</option>
+        <option value="neighbors">Neighbors</option>
+      </select>
+      <button onclick="addCustomQuestion()">Save Question</button>
+    </div>
+
+    <!-- Spin Section (Bottom) -->
+    <div class="card spin-section" style="order:3">
+      <img id="spinningImage" src="croppedimage.jpg" alt="bottle"/>
+      <div id="spinResult">Select a game and spin the bottle!</div>
+      <div style="display:flex;gap:10px">
+        <button onclick="spinBottle()" class="spin-btn">Spin Bottle</button>
+      </div>
+      <div style="font-size:12px;color:#666;margin-top:6px">Tip: Use Game Type (Couples/Family/Teens/Neighbors/General)</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+let players = [];
+let currentGame = 1;
+let currentGameType = 'general';
+const recentQuestions = [];
+const RECENT_CAP = 10;
+
+// DOM refs
+const savedPlayersContainer = document.getElementById('savedPlayersContainer');
+const spinResult = document.getElementById('spinResult');
+const spinningImage = document.getElementById('spinningImage');
+
+// Themed questions
+const themedQuestionBank = {
+  couples:["What's one small thing your partner does that makes you smile?","What's your favorite memory together so far?","If you planned a surprise date, what would it be?"],
+  parents:["What's a funny family rule you still remember?","Name a snack that brings back childhood memories."],
+  family:["What's a family memory that makes everyone laugh out loud?","If your family had a mascot, what would it be?"],
+  teens:["What's a funny trend you think will still exist in 5 years?","What's an app that always makes you laugh?"],
+  neighbors:["What's the nicest thing a neighbor ever did for you?","If our street had a mascot, what should it be?"],
+  general:["If you could swap lives with a fictional character for a day, who would it be?","Name three things you'd pack for a 24-hour adventure."]
+};
+
+// Truth/Dare fallback
+const localTruthDare = {
+  couples:{truth:["Silliest pet name you like?"],dare:["Send a cute message to your partner"]},
+  parents:{truth:["Funniest thing your child did?"],dare:["Do your best cartoon impression"]},
+  family:{truth:["Which family member tells best jokes?"],dare:["Act like an animal until guessed"]},
+  teens:{truth:["Funny thing in your bag?"],dare:["Do 10s lip-sync"]},
+  neighbors:{truth:["Friendly favor to a new neighbor?"],dare:["Wave and shout hello in silly voice"]},
+  general:{truth:["Favorite icebreaker question?"],dare:["Give 10s motivational shout-out"]}
+};
+
+// Custom user-added questions
+const customQuestionBank = {
+  general:[], couples:[], parents:[], family:[], teens:[], neighbors:[]
+};
+
+// Helpers
+function pushRecent(q){ if(!q) return; recentQuestions.push(q.trim()); while(recentQuestions.length>RECENT_CAP) recentQuestions.shift();}
+function isRecent(q){return q && recentQuestions.includes(q.trim());}
+
+// ---------- Players ----------
+function renderPlayers(){
+  savedPlayersContainer.innerHTML='<h3>Players</h3>';
+  if(players.length===0){
+    const msg=document.createElement('div'); msg.style.cssText='text-align:center;color:#777;padding:6px 0'; msg.textContent='No players yet — add someone!';
+    savedPlayersContainer.appendChild(msg);
+    return;
+  }
+  players.forEach((p,i)=>{
+    const div=document.createElement('div'); div.className='player-card';
+    div.innerHTML=`<div>${p.name} ${p.emoji}</div><div><span class="delete" onclick="removePlayer(${i})">❌</span></div>`;
+    savedPlayersContainer.appendChild(div);
+  });
+}
+function addPlayer(){ 
+  const ni=document.getElementById('playerNameInput'); const emoji=document.getElementById('playerEmojiSelect').value; 
+  const name=ni.value.trim(); if(!name){alert('Enter a player name'); return;}
+  players.push({name,emoji}); ni.value=''; renderPlayers();
+}
+function removePlayer(i){players.splice(i,1);renderPlayers();}
+function resetPlayers(){if(confirm('Clear all players?')){players=[];renderPlayers();}}
+
+// ---------- Game selection ----------
+function selectGame(n){currentGame=n; spinResult.textContent=n===1?'🎯 Classic spin selected!':n===2?'❓ Question mode selected!':'🔥 Truth or Dare selected!';}
+function setGameType(t){currentGameType=t;}
+
+// ---------- Custom Questions ----------
+function addCustomQuestion(){
+  const qInput=document.getElementById('customQuestionInput'); 
+  const type=document.getElementById('customQuestionType').value; 
+  const question=qInput.value.trim(); 
+  if(!question){alert("Enter a question first!"); return;}
+  customQuestionBank[type].push(question); qInput.value=''; alert("Question added!");
+}
+
+// ---------- Get question ----------
+async function getQuestionForType(type){
+  const custom=customQuestionBank[type]||[];
+  const customCandidates=custom.filter(q=>!isRecent(q));
+  if(customCandidates.length){const pick=customCandidates[Math.floor(Math.random()*customCandidates.length)];pushRecent(pick);return pick;}
+  const themed=themedQuestionBank[type]||themedQuestionBank.family;
+  const candidates=themed.filter(q=>!isRecent(q));
+  const pick=candidates.length?candidates[Math.floor(Math.random()*candidates.length)]:themed[Math.floor(Math.random()*themed.length)];
+  pushRecent(pick); return pick;
+}
+async function getTruthOrDareForType(kind,type){
+  const pool=(localTruthDare[type] && localTruthDare[type][kind])?localTruthDare[type][kind]:localTruthDare.general[kind];
+  const candidates=pool.filter(q=>!isRecent(q));
+  const pick=candidates.length?candidates[Math.floor(Math.random()*candidates.length)]:pool[Math.floor(Math.random()*pool.length)];
+  pushRecent(pick); return pick;
+}
+
+// ---------- Spin ----------
+function spinBottle(){
+  if(players.length===0){alert('Add some players first!'); return;}
+  const segment=360/players.length;
+  const randomDeg=Math.floor(Math.random()*360);
+  const playerIndex=Math.floor(randomDeg/segment);
+  spinningImage.style.transform=`rotate(${randomDeg+720}deg)`;
+  spinResult.textContent='Spinning... 🌀';
+  setTimeout(async()=>{
+    const chosen=players[playerIndex];
+    if(currentGame===1){spinResult.textContent=`Turn: ${chosen.name} ${chosen.emoji}`;}
+    else if(currentGame===2){spinResult.textContent=`Getting question for ${chosen.name}...`; 
+      const q=await getQuestionForType(currentGameType);
+      spinResult.innerHTML=`🎯 ${chosen.name} ${chosen.emoji}, question:<br><em>${q}</em>`;}
+    else if(currentGame===3){spinResult.textContent=`Choosing Truth or Dare for ${chosen.name}...`;
+      const isTruth=Math.random()<0.5; const type=isTruth?'truth':'dare';
+      const q=await getTruthOrDareForType(type,currentGameType);
+      spinResult.innerHTML=`🔥 ${chosen.name} ${chosen.emoji} — <strong>${type.toUpperCase()}</strong>:<br><em>${q}</em>`;}
+  },2100);
+}
+
+// ---------- Init ----------
+selectGame(1);
+renderPlayers();
+</script>
+</body>
+</html>
