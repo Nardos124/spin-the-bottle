@@ -6,10 +6,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <style>
 :root{--accent:#6c5ce7;--muted:#4b4b7d}
-html,body{height:100%;margin:0;font-family:'Poppins',sans-serif;display:flex;flex-direction:column;}
+html,body{background-image: url("images/spinimg.jpg"); height:100%;margin:0;font-family:'Poppins',sans-serif;display:flex;flex-direction:column;}
 body::before{
   content:"";position:fixed;inset:0;
-  background:linear-gradient(rgba(0,0,0,0.28),rgba(0,0,0,0.28)),url('./images/croppedimage.jpg') center/cover no-repeat;
+  background:linear-gradient(rgba(0,0,0,0.28),rgba(0,0,0,0.28)),url("./images/spinimg.JPG") center/cover no-repeat;
   filter:blur(6px);z-index:-1;
 }
 .header{display:flex;justify-content:space-between;align-items:center;background:rgba(255,255,255,0.85);backdrop-filter:blur(10px);padding:14px 28px;box-shadow:0 4px 10px rgba(0,0,0,0.08);position:sticky;top:0;z-index:10}
@@ -102,7 +102,7 @@ body::before{
 
     <!-- Spin Section (Bottom) -->
     <div class="card spin-section" style="order:3">
-      <img id="spinningImage" src="images/croppedimage.jpg" alt="bottle"/>
+      <img id="spinningImage" src="croppedimage.jpg" alt="bottle"/>
       <div id="spinResult">Select a game and spin the bottle!</div>
       <div style="display:flex;gap:10px">
         <button onclick="spinBottle()" class="spin-btn">Spin Bottle</button>
