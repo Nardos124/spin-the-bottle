@@ -22,6 +22,10 @@ Users can spin the bottle to select a player randomly in a fun, engaging way.
 
 ---
 
+![Screenshot of my app]
+(images/spingame.png)
+
+
 ## 🚀 How to Run Locally
 
 1. Clone the repository:  
