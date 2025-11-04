@@ -3,7 +3,7 @@
 A simple interactive **Spin-the-Bottle game** built with **HTML, CSS, and JavaScript**.  
 Users can spin the bottle to select a player randomly in a fun, engaging way.
 
----
+----
 
 ## 🎮 Features
 
@@ -12,7 +12,7 @@ Users can spin the bottle to select a player randomly in a fun, engaging way.
 - Responsive design (works on desktop and mobile)  
 - Easy to play with friends  
 
----
+----
 
 ## 🛠️ Technologies Used
 
